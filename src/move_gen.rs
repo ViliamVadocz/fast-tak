@@ -38,7 +38,9 @@ impl<const N: usize, const HALF_KOMI: i8> Game<N, HALF_KOMI> {
         for x in 0..n {
             for y in 0..n {
                 let square = Square::new(x, y);
-                let Some(stack) = self.board.get(square) else { continue; };
+                let Some(stack) = self.board.get(square) else {
+                    continue;
+                };
                 if stack.is_empty() {
                     moves.push(Move::new(square, MoveKind::Place(Piece::Flat)));
                 }
@@ -68,7 +70,9 @@ impl<const N: usize, const HALF_KOMI: i8> Game<N, HALF_KOMI> {
 
         let n = N as u8;
 
-        let Some(stack) = self.board.get(square) else {return;};
+        let Some(stack) = self.board.get(square) else {
+            return;
+        };
         let max_carry: u8 = stack.size().min(N as u32) as u8;
 
         let mut spreads = Vec::new();

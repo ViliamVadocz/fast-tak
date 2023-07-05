@@ -145,7 +145,9 @@ impl<const N: usize, const HALF_KOMI: i8> Game<N, HALF_KOMI> {
             for color in carry.by_ref().take(drop_count as usize) {
                 amount -= 1;
                 // unwrap is sound since we checked whether it is on the board earlier
-                let Some(stack) = self.board.get_mut(pos) else { continue; };
+                let Some(stack) = self.board.get_mut(pos) else {
+                    continue;
+                };
                 stack.stack(if amount > 0 { Piece::Flat } else { piece }, color)?;
             }
         }
