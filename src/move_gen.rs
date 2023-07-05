@@ -131,6 +131,7 @@ impl<const N: usize, const HALF_KOMI: i8> Game<N, HALF_KOMI> {
     }
 }
 
+#[must_use]
 pub fn perf_count<const N: usize, const HALF_KOMI: i8>(
     game: Game<N, HALF_KOMI>,
     depth: usize,

@@ -31,10 +31,12 @@ where
 }
 
 impl<const N: usize, const HALF_KOMI: i8> Game<N, HALF_KOMI> {
+    #[must_use]
     pub const fn board(&self) -> Board<N> {
         self.board
     }
 
+    #[must_use]
     pub const fn to_move(&self) -> Color {
         self.to_move
     }

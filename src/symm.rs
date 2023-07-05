@@ -97,6 +97,7 @@ fn zip<const N: usize, A: Copy, B: Copy>(a: [A; N], b: [B; N]) -> [(A, B); N] {
 }
 
 impl<const N: usize, const HALF_KOMI: i8> Game<N, HALF_KOMI> {
+    #[must_use]
     pub fn canonical(mut self) -> (usize, Self) {
         let (i, board) = self
             .board

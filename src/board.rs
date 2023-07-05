@@ -22,6 +22,7 @@ impl<const N: usize> Board<N> {
     }
 
     #[inline]
+    #[must_use]
     pub fn get(&self, square: Square) -> Option<&Stack> {
         self.data
             .get(square.row() as usize)
@@ -35,10 +36,12 @@ impl<const N: usize> Board<N> {
             .and_then(|r| r.get_mut(square.column() as usize))
     }
 
+    #[must_use]
     pub fn full(&self) -> bool {
         !self.data.iter().any(|row| row.iter().any(Stack::is_empty))
     }
 
+    #[must_use]
     pub fn flat_diff(&self) -> i8 {
         self.data
             .iter()
@@ -51,6 +54,7 @@ impl<const N: usize> Board<N> {
             .sum()
     }
 
+    #[must_use]
     pub fn has_road(&self, color: Color) -> bool {
         let road = self.data.map(|row| row.map(|s| s.road(color)));
         let mut seen = [[false; N]; N];
