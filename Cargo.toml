@@ -1,0 +1,24 @@
+[package]
+name = "fast-tak"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+rust-version = "1.65"
+
+description = "Implementation of the abstract strategy board game Tak"
+homepage = "https://github.com/ViliamVadocz/fast-tak"
+documentation = "https://docs.rs/fast-tak"
+repository = "https://github.com/ViliamVadocz/fast-tak"
+readme = "README.md"
+
+keywords = ["tak", "game"]
+
+[dependencies]
+takparse = "0.5.5"
+
+[dev-dependencies]
+criterion = "0.4"
+
+[[bench]]
+name = "bench"
+harness = false
