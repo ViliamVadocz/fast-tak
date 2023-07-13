@@ -1,7 +1,7 @@
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Reserves<const N: usize> {
-    pub(crate) stones: u8,
-    pub(crate) caps: u8,
+    pub stones: u8,
+    pub caps: u8,
 }
 
 impl Default for Reserves<3> {
