@@ -6,12 +6,12 @@ use crate::{board::Board, error::PlayError, reserves::Reserves, stack::Stack};
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Game<const N: usize, const HALF_KOMI: i8> {
-    pub(crate) board: Board<N>,
-    pub(crate) to_move: Color,
-    pub(crate) white_reserves: Reserves<N>,
-    pub(crate) black_reserves: Reserves<N>,
-    pub(crate) ply: u16,
-    pub(crate) reversible_plies: u16,
+    pub board: Board<N>,
+    pub to_move: Color,
+    pub white_reserves: Reserves<N>,
+    pub black_reserves: Reserves<N>,
+    pub ply: u16,
+    pub reversible_plies: u16,
 }
 
 impl<const N: usize, const HALF_KOMI: i8> Default for Game<N, HALF_KOMI>
@@ -31,16 +31,6 @@ where
 }
 
 impl<const N: usize, const HALF_KOMI: i8> Game<N, HALF_KOMI> {
-    #[must_use]
-    pub const fn board(&self) -> Board<N> {
-        self.board
-    }
-
-    #[must_use]
-    pub const fn to_move(&self) -> Color {
-        self.to_move
-    }
-
     pub(crate) const fn is_swapped(&self) -> bool {
         self.ply < 2
     }
