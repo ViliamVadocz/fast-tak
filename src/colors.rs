@@ -1,6 +1,6 @@
 use takparse::Color;
 
-type BitVec = u128;
+type BitVec = u64;
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Colors {
