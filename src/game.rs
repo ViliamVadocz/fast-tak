@@ -4,7 +4,7 @@ use takparse::{Color, Direction, Move, MoveKind, Pattern, Piece, Square};
 
 use crate::{board::Board, error::PlayError, reserves::Reserves, stack::Stack};
 
-#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Game<const N: usize, const HALF_KOMI: i8> {
     pub board: Board<N>,
     pub to_move: Color,
@@ -12,6 +12,14 @@ pub struct Game<const N: usize, const HALF_KOMI: i8> {
     pub black_reserves: Reserves<N>,
     pub ply: u16,
     pub reversible_plies: u16,
+}
+
+// https://godbolt.org/z/434j733oW
+impl<const N: usize, const HALF_KOMI: i8> Clone for Game<N, HALF_KOMI> {
+    #[inline]
+    fn clone(&self) -> Self {
+        unsafe { std::mem::transmute_copy(self) }
+    }
 }
 
 impl<const N: usize, const HALF_KOMI: i8> Default for Game<N, HALF_KOMI>

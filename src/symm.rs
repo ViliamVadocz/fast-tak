@@ -3,14 +3,14 @@ use takparse::{Direction, Move, MoveKind, Square};
 use crate::{board::Board, game::Game};
 
 pub trait Symmetry<const N: usize>: Sized {
-    fn symmetries(self) -> [Self; 8];
+    fn symmetries(&self) -> [Self; 8];
 }
 
 impl<const N: usize> Symmetry<N> for Square {
-    fn symmetries(self) -> [Self; 8] {
+    fn symmetries(&self) -> [Self; 8] {
         let n = N as u8;
         [
-            self,
+            *self,
             self.rotate(n),
             self.rotate(n).rotate(n),
             self.rotate(n).rotate(n).rotate(n),
@@ -23,9 +23,9 @@ impl<const N: usize> Symmetry<N> for Square {
 }
 
 impl<const N: usize> Symmetry<N> for Direction {
-    fn symmetries(self) -> [Self; 8] {
+    fn symmetries(&self) -> [Self; 8] {
         [
-            self,
+            *self,
             self.rotate(),
             self.rotate().rotate(),
             self.rotate().rotate().rotate(),
@@ -38,16 +38,16 @@ impl<const N: usize> Symmetry<N> for Direction {
 }
 
 impl<const N: usize> Symmetry<N> for Move {
-    fn symmetries(self) -> [Self; 8] {
+    fn symmetries(&self) -> [Self; 8] {
         let square = self.square();
         let kind = self.kind();
         match kind {
             MoveKind::Place(_) => {
-                Symmetry::<N>::symmetries(square).map(|square| Self::new(square, kind))
+                Symmetry::<N>::symmetries(&square).map(|square| Self::new(square, kind))
             }
             MoveKind::Spread(direction, pattern) => zip(
-                Symmetry::<N>::symmetries(square),
-                Symmetry::<N>::symmetries(direction),
+                Symmetry::<N>::symmetries(&square),
+                Symmetry::<N>::symmetries(&direction),
             )
             .map(|(square, direction)| Self::new(square, MoveKind::Spread(direction, pattern))),
         }
@@ -55,12 +55,12 @@ impl<const N: usize> Symmetry<N> for Move {
 }
 
 impl<const N: usize> Symmetry<N> for Board<N> {
-    fn symmetries(self) -> [Self; 8] {
-        let mut boards = [self; 8];
+    fn symmetries(&self) -> [Self; 8] {
+        let mut boards = [(); 8].map(|()| self.clone());
         for (x, row) in self.iter().enumerate() {
             for (y, &stack) in row.enumerate() {
                 let square = Square::new(x as u8, y as u8);
-                for (i, sym) in Symmetry::<N>::symmetries(square)
+                for (i, sym) in Symmetry::<N>::symmetries(&square)
                     .into_iter()
                     .enumerate()
                     .skip(1)
@@ -77,8 +77,8 @@ impl<const N: usize> Symmetry<N> for Board<N> {
 }
 
 impl<const N: usize, const HALF_KOMI: i8> Symmetry<N> for Game<N, HALF_KOMI> {
-    fn symmetries(self) -> [Self; 8] {
-        let mut games = [self; 8];
+    fn symmetries(&self) -> [Self; 8] {
+        let mut games = [(); 8].map(|()| self.clone());
         for (i, board) in self.board.symmetries().into_iter().enumerate().skip(1) {
             games[i].board = board;
         }
@@ -98,16 +98,13 @@ fn zip<const N: usize, A: Copy, B: Copy>(a: [A; N], b: [B; N]) -> [(A, B); N] {
 
 impl<const N: usize, const HALF_KOMI: i8> Game<N, HALF_KOMI> {
     #[must_use]
-    pub fn canonical(mut self) -> (usize, Self) {
-        let (i, board) = self
-            .board
-            .symmetries()
-            .into_iter()
-            .enumerate()
-            .min_by_key(|(_, board)| *board)
-            .unwrap();
-        self.board = board;
-        (i, self)
+    pub fn canonical(mut self) -> Self {
+        for board in self.board.symmetries() {
+            if board < self.board {
+                self.board = board;
+            }
+        }
+        self
     }
 }
 
@@ -126,7 +123,7 @@ mod tests {
             moves.clear();
             g0.possible_moves(&mut moves);
             let my_move = moves[seed % moves.len()];
-            let [t0, t1, t2, t3, t4, t5, t6, t7] = Symmetry::<N>::symmetries(my_move);
+            let [t0, t1, t2, t3, t4, t5, t6, t7] = Symmetry::<N>::symmetries(&my_move);
             g0.play(t0)?;
             g1.play(t1)?;
             g2.play(t2)?;

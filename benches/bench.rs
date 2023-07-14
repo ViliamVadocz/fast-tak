@@ -13,15 +13,15 @@ const ENDGAME_TPS: &str = "1,1,1S,121,2,1/2,12,2,1,2,1/2,x,2,221C,12C,1/x,212,22
 fn perft(c: &mut Criterion) {
     c.bench_function("perft 5x5 depth 4", |b| {
         let game = Game::<5, 0>::default();
-        b.iter(|| perf_count(game, black_box(4)))
+        b.iter(|| perf_count(game.clone(), black_box(4)))
     });
     c.bench_function("perft 6x6 depth 4", |b| {
         let game = Game::<6, 0>::default();
-        b.iter(|| perf_count(game, black_box(4)))
+        b.iter(|| perf_count(game.clone(), black_box(4)))
     });
     c.bench_function("perft 7x7 depth 4", |b| {
         let game = Game::<7, 0>::default();
-        b.iter(|| perf_count(game, black_box(4)))
+        b.iter(|| perf_count(game.clone(), black_box(4)))
     });
 }
 
@@ -31,7 +31,7 @@ fn move_gen(c: &mut Criterion) {
         let moves = Vec::new();
         b.iter_batched_ref(
             || moves.clone(),
-            |moves| black_box(game).possible_moves(moves),
+            |moves| black_box(&game).possible_moves(moves),
             BatchSize::SmallInput,
         )
     });
@@ -40,7 +40,7 @@ fn move_gen(c: &mut Criterion) {
         let moves = Vec::new();
         b.iter_batched_ref(
             || moves.clone(),
-            |moves| black_box(game).possible_moves(moves),
+            |moves| black_box(&game).possible_moves(moves),
             BatchSize::SmallInput,
         )
     });
@@ -49,7 +49,7 @@ fn move_gen(c: &mut Criterion) {
         let moves = Vec::new();
         b.iter_batched_ref(
             || moves.clone(),
-            |moves| black_box(game).possible_moves(moves),
+            |moves| black_box(&game).possible_moves(moves),
             BatchSize::SmallInput,
         )
     });
@@ -60,7 +60,7 @@ fn making_moves(c: &mut Criterion) {
         let game: Game<6, 4> = ENDGAME_TPS.parse::<Tps>().unwrap().into();
         let mov = "5c3>212".parse().unwrap();
         b.iter_batched(
-            || game,
+            || game.clone(),
             |mut g| g.play(black_box(mov)).unwrap(),
             BatchSize::SmallInput,
         )
@@ -70,15 +70,27 @@ fn making_moves(c: &mut Criterion) {
 fn canonical(c: &mut Criterion) {
     c.bench_function("canonical early", |b| {
         let game: Game<6, 4> = EARLY_TPS.parse::<Tps>().unwrap().into();
-        b.iter(|| black_box(game).canonical())
+        b.iter_batched(
+            || game.clone(),
+            |g| black_box(g).canonical(),
+            BatchSize::SmallInput,
+        )
     });
     c.bench_function("canonical middle", |b| {
         let game: Game<6, 4> = MIDDLE_TPS.parse::<Tps>().unwrap().into();
-        b.iter(|| black_box(game).canonical())
+        b.iter_batched(
+            || game.clone(),
+            |g| black_box(g).canonical(),
+            BatchSize::SmallInput,
+        )
     });
     c.bench_function("canonical endgame", |b| {
         let game: Game<6, 4> = ENDGAME_TPS.parse::<Tps>().unwrap().into();
-        b.iter(|| black_box(game).canonical())
+        b.iter_batched(
+            || game.clone(),
+            |g| black_box(g).canonical(),
+            BatchSize::SmallInput,
+        )
     });
 }
 

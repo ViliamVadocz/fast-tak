@@ -152,7 +152,7 @@ pub fn perf_count<const N: usize, const HALF_KOMI: i8>(
         moves
             .into_iter()
             .map(|m| {
-                let mut clone = game;
+                let mut clone = game.clone();
                 if clone.play(m).is_err() {
                     return 0;
                 };
@@ -169,9 +169,9 @@ mod tests {
     #[test]
     fn move_stack_perft() {
         let game = Game::<5, 0>::from_ptn_moves(&["d3", "c3", "c4", "1d3<", "1c4-", "Sc4"]);
-        assert_eq!(perf_count(game, 1), 87);
-        assert_eq!(perf_count(game, 2), 6_155);
-        assert_eq!(perf_count(game, 3), 461_800);
+        assert_eq!(perf_count(game.clone(), 1), 87);
+        assert_eq!(perf_count(game.clone(), 2), 6_155);
+        assert_eq!(perf_count(game.clone(), 3), 461_800);
     }
 
     #[test]
@@ -179,9 +179,9 @@ mod tests {
         let game = Game::<5, 0>::from_ptn_moves(&[
             "c2", "c3", "d3", "b3", "c4", "1c2+", "1d3<", "1b3>", "1c4-", "Cc2", "a1", "1c2+", "a2",
         ]);
-        assert_eq!(perf_count(game, 1), 104);
-        assert_eq!(perf_count(game, 2), 7_743);
-        assert_eq!(perf_count(game, 3), 592_645);
+        assert_eq!(perf_count(game.clone(), 1), 104);
+        assert_eq!(perf_count(game.clone(), 2), 7_743);
+        assert_eq!(perf_count(game.clone(), 3), 592_645);
     }
 
     #[test]
@@ -192,9 +192,9 @@ mod tests {
             "1c3<", "d2", "c3", "1d2+", "1c3+", "1b4>", "2b3>11", "3c4-12", "d2", "c4", "b4", "c5",
             "1b3>", "1c4<", "3c3-", "e5", "e2",
         ]);
-        assert_eq!(perf_count(game, 1), 85);
-        assert_eq!(perf_count(game, 2), 11_206);
-        assert_eq!(perf_count(game, 3), 957_000);
+        assert_eq!(perf_count(game.clone(), 1), 85);
+        assert_eq!(perf_count(game.clone(), 2), 11_206);
+        assert_eq!(perf_count(game.clone(), 3), 957_000);
     }
 
     #[test]
@@ -204,10 +204,10 @@ mod tests {
             "b2", "a2", "Sb1", "a3", "Ce4", "Cb5", "a4", "a1", "e5", "e3", "c3<", "Sc3", "c1>",
             "c1", "2d1+", "c3-", "c3", "a3>", "a3", "d1", "e4<", "2c2>", "c2", "e2", "b2+", "b2",
         ]);
-        assert_eq!(perf_count(game, 1), 65);
-        assert_eq!(perf_count(game, 2), 4_072);
-        assert_eq!(perf_count(game, 3), 272_031);
-        assert_eq!(perf_count(game, 4), 16_642_760);
+        assert_eq!(perf_count(game.clone(), 1), 65);
+        assert_eq!(perf_count(game.clone(), 2), 4_072);
+        assert_eq!(perf_count(game.clone(), 3), 272_031);
+        assert_eq!(perf_count(game.clone(), 4), 16_642_760);
     }
 
     #[test]
@@ -219,10 +219,10 @@ mod tests {
             "d2<", "d2", "2d4-", "d4", "c5", "b5", "2c2>", "d1+", "c2", "e2+", "d1", "e2", "c5<",
             "c5", "e4<", "Se4", "2b5-", "e4-", "a3-",
         ]);
-        assert_eq!(perf_count(game, 1), 152);
-        assert_eq!(perf_count(game, 2), 15_356);
-        assert_eq!(perf_count(game, 3), 1_961_479);
-        // assert_eq!(perf_count(&game, 4), 197_434_816);
+        assert_eq!(perf_count(game.clone(), 1), 152);
+        assert_eq!(perf_count(game.clone(), 2), 15_356);
+        assert_eq!(perf_count(game.clone(), 3), 1_961_479);
+        // assert_eq!(perf_count(game.clone(), 4), 197_434_816);
     }
 
     #[test]

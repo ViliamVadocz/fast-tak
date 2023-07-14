@@ -2,7 +2,7 @@ use takparse::{Color, Piece, Square, Stack as TpsStack};
 
 use crate::stack::Stack;
 
-#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Board<const N: usize> {
     data: [[Stack; N]; N],
 }
@@ -12,6 +12,14 @@ impl<const N: usize> Default for Board<N> {
         Self {
             data: [[Stack::default(); N]; N],
         }
+    }
+}
+
+// https://godbolt.org/z/434j733oW
+impl<const N: usize> Clone for Board<N> {
+    #[inline]
+    fn clone(&self) -> Self {
+        unsafe { std::mem::transmute_copy(self) }
     }
 }
 

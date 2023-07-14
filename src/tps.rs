@@ -129,7 +129,7 @@ mod tests {
             println!("{my_move}");
             game.play(my_move)?;
 
-            let tps: Tps = game.into();
+            let tps: Tps = game.clone().into();
             println!("{tps}");
             let tps_game: Game<N, 0> = tps.into();
 
