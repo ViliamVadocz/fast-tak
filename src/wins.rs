@@ -4,7 +4,7 @@ use takparse::Color;
 
 use crate::{game_result::Reason, Game, GameResult};
 
-const MAX_REVERSIBLE_PLIES: u16 = 50;
+pub const MAX_REVERSIBLE_PLIES: u16 = 50;
 
 impl<const N: usize, const HALF_KOMI: i8> Game<N, HALF_KOMI> {
     #[must_use]
