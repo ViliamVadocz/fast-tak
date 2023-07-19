@@ -14,20 +14,24 @@ impl Default for Colors {
 }
 
 impl Colors {
+    #[inline]
     pub const fn of_one(color: Color) -> Self {
         Self {
             bits: 0b10 + from_color(color),
         }
     }
 
+    #[inline]
     pub const fn is_empty(&self) -> bool {
         self.bits == 1
     }
 
+    #[inline]
     pub const fn len(&self) -> u32 {
         BitVec::BITS - (self.bits.leading_zeros() + 1)
     }
 
+    #[inline]
     pub const fn top(&self) -> Option<Color> {
         if self.is_empty() {
             return None;
@@ -35,10 +39,12 @@ impl Colors {
         Some(to_color(self.bits & 1))
     }
 
+    #[inline]
     pub fn push(&mut self, color: Color) {
         self.bits = (self.bits << 1) | BitVec::from(color == Color::White);
     }
 
+    #[inline]
     pub fn pop(&mut self) -> Option<Color> {
         if self.is_empty() {
             return None;
@@ -48,6 +54,7 @@ impl Colors {
         Some(color)
     }
 
+    #[inline]
     pub fn take(&mut self, amount: u32) -> Option<Self> {
         if amount > self.len() {
             return None;
@@ -59,6 +66,7 @@ impl Colors {
         Some(taken)
     }
 
+    #[inline]
     pub fn reverse(self) -> Self {
         let len = self.len();
         let bits = (1 << len) | (self.bits.reverse_bits() >> (BitVec::BITS - len));
@@ -70,6 +78,7 @@ impl IntoIterator for Colors {
     type IntoIter = ColorsIter;
     type Item = Color;
 
+    #[inline]
     fn into_iter(self) -> Self::IntoIter {
         ColorsIter(self.reverse())
     }
@@ -80,10 +89,12 @@ pub struct ColorsIter(Colors);
 impl Iterator for ColorsIter {
     type Item = Color;
 
+    #[inline]
     fn next(&mut self) -> Option<Self::Item> {
         self.0.pop()
     }
 
+    #[inline]
     fn size_hint(&self) -> (usize, Option<usize>) {
         let len = self.0.len() as usize;
         (len, Some(len))
