@@ -58,6 +58,12 @@ impl Colors {
         self.bits >>= amount;
         Some(taken)
     }
+
+    pub fn reverse(self) -> Self {
+        let len = self.len();
+        let bits = (1 << len) | (self.bits.reverse_bits() >> (BitVec::BITS - len));
+        Colors { bits }
+    }
 }
 
 impl IntoIterator for Colors {
@@ -65,9 +71,7 @@ impl IntoIterator for Colors {
     type Item = Color;
 
     fn into_iter(self) -> Self::IntoIter {
-        let len = self.len();
-        let bits = (1 << len) | (self.bits.reverse_bits() >> (BitVec::BITS - len));
-        ColorsIter(Self { bits })
+        ColorsIter(self.reverse())
     }
 }
 
@@ -154,7 +158,7 @@ mod tests {
 
         assert_eq!(colors.len(), 6);
         let v: Vec<_> = colors.into_iter().collect();
-        assert_eq!(v, vec![
+        assert_eq!(v, [
             Color::White,
             Color::Black,
             Color::Black,
@@ -187,5 +191,37 @@ mod tests {
 
         assert_eq!(colors.pop(), Some(Color::White));
         assert_eq!(colors.pop(), None);
+    }
+
+    #[test]
+    fn reverse() {
+        let mut colors = Colors::of_one(Color::White);
+        colors.push(Color::White);
+        colors.push(Color::Black);
+        colors.push(Color::Black);
+        colors.push(Color::Black);
+        colors.push(Color::White);
+
+        assert_eq!(colors.len(), 6);
+        assert_eq!(colors, colors.reverse().reverse());
+        let v: Vec<_> = colors.reverse().into_iter().collect();
+        assert_eq!(v, [
+            Color::White,
+            Color::Black,
+            Color::Black,
+            Color::Black,
+            Color::White,
+            Color::White
+        ]);
+
+        // Check that iterator goes from bottom to top.
+        let mut iter = colors.into_iter();
+        let mut reverse = colors.reverse();
+        assert_eq!(reverse.len(), 6);
+        while let (Some(x), Some(y)) = (iter.next(), reverse.pop()) {
+            assert_eq!(x, y);
+        }
+        assert_eq!(iter.count(), 0);
+        assert!(reverse.is_empty());
     }
 }
