@@ -1,3 +1,5 @@
+use std::array;
+
 use takparse::{Color, Piece, Square, Stack as TpsStack};
 
 use crate::stack::Stack;
@@ -134,7 +136,7 @@ impl<'a, const N: usize> FromIterator<Option<&'a TpsStack>> for Board<N> {
                 Stack::exact(stack.top(), stack.colors().collect())
             })
         });
-        let mut data = [(); N].map(|()| [(); N].map(|()| iter.next().unwrap_or_default()));
+        let mut data = array::from_fn(|_| array::from_fn(|_| iter.next().unwrap_or_default()));
         data.reverse();
         Self { data }
     }

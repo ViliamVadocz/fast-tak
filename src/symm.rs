@@ -1,3 +1,5 @@
+use std::array;
+
 use takparse::{Direction, Move, MoveKind, Square};
 
 use crate::{board::Board, game::Game};
@@ -56,7 +58,7 @@ impl<const N: usize> Symmetry<N> for Move {
 
 impl<const N: usize> Symmetry<N> for Board<N> {
     fn symmetries(&self) -> [Self; 8] {
-        let mut boards = [(); 8].map(|()| self.clone());
+        let mut boards = array::from_fn(|_| self.clone());
         for (x, row) in self.iter().enumerate() {
             for (y, &stack) in row.enumerate() {
                 let square = Square::new(x as u8, y as u8);
@@ -78,7 +80,7 @@ impl<const N: usize> Symmetry<N> for Board<N> {
 
 impl<const N: usize, const HALF_KOMI: i8> Symmetry<N> for Game<N, HALF_KOMI> {
     fn symmetries(&self) -> [Self; 8] {
-        let mut games = [(); 8].map(|()| self.clone());
+        let mut games = array::from_fn(|_| self.clone());
         for (i, board) in self.board.symmetries().into_iter().enumerate().skip(1) {
             games[i].board = board;
         }
@@ -88,12 +90,7 @@ impl<const N: usize, const HALF_KOMI: i8> Symmetry<N> for Game<N, HALF_KOMI> {
 
 #[inline]
 fn zip<const N: usize, A: Copy, B: Copy>(a: [A; N], b: [B; N]) -> [(A, B); N] {
-    let mut i = 0;
-    [(); N].map(|()| {
-        let r = (a[i], b[i]);
-        i += 1;
-        r
-    })
+    array::from_fn(|i| (a[i], b[i]))
 }
 
 impl<const N: usize, const HALF_KOMI: i8> Game<N, HALF_KOMI> {
