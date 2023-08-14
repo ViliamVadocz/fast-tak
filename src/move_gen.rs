@@ -9,7 +9,7 @@ impl<const N: usize, const HALF_KOMI: i8> Game<N, HALF_KOMI> {
     ///
     /// If the move vector is not empty.
     pub fn possible_moves(&self, moves: &mut Vec<Move>) {
-        assert!(moves.is_empty());
+        debug_assert!(moves.is_empty());
         let n = N as u8;
         // On the first two plies the only possible moves are placing a flat.
         if self.is_swapped() {
