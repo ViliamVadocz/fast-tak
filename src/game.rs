@@ -135,7 +135,7 @@ impl<const N: usize, const HALF_KOMI: i8> Game<N, HALF_KOMI> {
 
         // For each square in the spread, stack dropped pieces.
         let mut pos = square;
-        for drop_count in pattern.drop_counts() {
+        for drop_count in pattern {
             pos = pos
                 .checked_step(direction, n)
                 .ok_or(PlayError::SpreadOutOfBounds)?;
