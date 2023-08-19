@@ -10,7 +10,7 @@ impl<const N: usize, const HALF_KOMI: i8> Game<N, HALF_KOMI> {
     /// If the move vector is not empty.
     pub fn possible_moves(&self, moves: &mut Vec<Move>) {
         debug_assert!(moves.is_empty());
-        let n = N as u8;
+        let n = u8::try_from(N).unwrap();
         // On the first two plies the only possible moves are placing a flat.
         if self.is_swapped() {
             self.add_opening_moves(moves);
@@ -34,7 +34,7 @@ impl<const N: usize, const HALF_KOMI: i8> Game<N, HALF_KOMI> {
     }
 
     fn add_opening_moves(&self, moves: &mut Vec<Move>) {
-        let n = N as u8;
+        let n = u8::try_from(N).unwrap();
         for x in 0..n {
             for y in 0..n {
                 let square = Square::new(x, y);
@@ -68,11 +68,12 @@ impl<const N: usize, const HALF_KOMI: i8> Game<N, HALF_KOMI> {
             drop_counts: usize,
         }
 
-        let n = N as u8;
+        let n = u8::try_from(N).unwrap();
 
         let Some(stack) = self.board.get(square) else {
             return;
         };
+        #[allow(clippy::cast_possible_truncation)]
         let max_carry: u8 = stack.size().min(N as u32) as u8;
 
         let mut spreads = Vec::new();
@@ -137,7 +138,7 @@ impl<const N: usize, const HALF_KOMI: i8> Game<N, HALF_KOMI> {
 
 #[must_use]
 pub fn perf_count<const N: usize, const HALF_KOMI: i8>(
-    game: Game<N, HALF_KOMI>,
+    game: &Game<N, HALF_KOMI>,
     depth: usize,
 ) -> usize {
     if depth == 0 || game.result() != GameResult::Ongoing {
@@ -156,7 +157,7 @@ pub fn perf_count<const N: usize, const HALF_KOMI: i8>(
                 if clone.play(m).is_err() {
                     return 0;
                 };
-                perf_count(clone, depth - 1)
+                perf_count(&clone, depth - 1)
             })
             .sum()
     }
@@ -169,9 +170,9 @@ mod tests {
     #[test]
     fn move_stack_perft() {
         let game = Game::<5, 0>::from_ptn_moves(&["d3", "c3", "c4", "1d3<", "1c4-", "Sc4"]);
-        assert_eq!(perf_count(game.clone(), 1), 87);
-        assert_eq!(perf_count(game.clone(), 2), 6_155);
-        assert_eq!(perf_count(game.clone(), 3), 461_800);
+        assert_eq!(perf_count(&game, 1), 87);
+        assert_eq!(perf_count(&game, 2), 6_155);
+        assert_eq!(perf_count(&game, 3), 461_800);
     }
 
     #[test]
@@ -179,9 +180,9 @@ mod tests {
         let game = Game::<5, 0>::from_ptn_moves(&[
             "c2", "c3", "d3", "b3", "c4", "1c2+", "1d3<", "1b3>", "1c4-", "Cc2", "a1", "1c2+", "a2",
         ]);
-        assert_eq!(perf_count(game.clone(), 1), 104);
-        assert_eq!(perf_count(game.clone(), 2), 7_743);
-        assert_eq!(perf_count(game.clone(), 3), 592_645);
+        assert_eq!(perf_count(&game, 1), 104);
+        assert_eq!(perf_count(&game, 2), 7_743);
+        assert_eq!(perf_count(&game, 3), 592_645);
     }
 
     #[test]
@@ -192,9 +193,9 @@ mod tests {
             "1c3<", "d2", "c3", "1d2+", "1c3+", "1b4>", "2b3>11", "3c4-12", "d2", "c4", "b4", "c5",
             "1b3>", "1c4<", "3c3-", "e5", "e2",
         ]);
-        assert_eq!(perf_count(game.clone(), 1), 85);
-        assert_eq!(perf_count(game.clone(), 2), 11_206);
-        assert_eq!(perf_count(game.clone(), 3), 957_000);
+        assert_eq!(perf_count(&game, 1), 85);
+        assert_eq!(perf_count(&game, 2), 11_206);
+        assert_eq!(perf_count(&game, 3), 957_000);
     }
 
     #[test]
@@ -204,10 +205,10 @@ mod tests {
             "b2", "a2", "Sb1", "a3", "Ce4", "Cb5", "a4", "a1", "e5", "e3", "c3<", "Sc3", "c1>",
             "c1", "2d1+", "c3-", "c3", "a3>", "a3", "d1", "e4<", "2c2>", "c2", "e2", "b2+", "b2",
         ]);
-        assert_eq!(perf_count(game.clone(), 1), 65);
-        assert_eq!(perf_count(game.clone(), 2), 4_072);
-        assert_eq!(perf_count(game.clone(), 3), 272_031);
-        assert_eq!(perf_count(game.clone(), 4), 16_642_760);
+        assert_eq!(perf_count(&game, 1), 65);
+        assert_eq!(perf_count(&game, 2), 4_072);
+        assert_eq!(perf_count(&game, 3), 272_031);
+        assert_eq!(perf_count(&game, 4), 16_642_760);
     }
 
     #[test]
@@ -219,28 +220,30 @@ mod tests {
             "d2<", "d2", "2d4-", "d4", "c5", "b5", "2c2>", "d1+", "c2", "e2+", "d1", "e2", "c5<",
             "c5", "e4<", "Se4", "2b5-", "e4-", "a3-",
         ]);
-        assert_eq!(perf_count(game.clone(), 1), 152);
-        assert_eq!(perf_count(game.clone(), 2), 15_356);
-        assert_eq!(perf_count(game.clone(), 3), 1_961_479);
+        assert_eq!(perf_count(&game, 1), 152);
+        assert_eq!(perf_count(&game, 2), 15_356);
+        assert_eq!(perf_count(&game, 3), 1_961_479);
         // assert_eq!(perf_count(game.clone(), 4), 197_434_816);
     }
 
     #[test]
     fn perft_5() {
-        assert_eq!(perf_count(Game::<5, 0>::default(), 0), 1);
-        assert_eq!(perf_count(Game::<5, 0>::default(), 1), 25);
-        assert_eq!(perf_count(Game::<5, 0>::default(), 2), 600);
-        assert_eq!(perf_count(Game::<5, 0>::default(), 3), 43_320);
-        assert_eq!(perf_count(Game::<5, 0>::default(), 4), 2_999_784);
+        type G = Game<5, 0>;
+        assert_eq!(perf_count(&G::default(), 0), 1);
+        assert_eq!(perf_count(&G::default(), 1), 25);
+        assert_eq!(perf_count(&G::default(), 2), 600);
+        assert_eq!(perf_count(&G::default(), 3), 43_320);
+        assert_eq!(perf_count(&G::default(), 4), 2_999_784);
     }
 
     #[test]
     fn perft_6() {
-        assert_eq!(perf_count(Game::<6, 0>::default(), 0), 1);
-        assert_eq!(perf_count(Game::<6, 0>::default(), 1), 36);
-        assert_eq!(perf_count(Game::<6, 0>::default(), 2), 1_260);
-        assert_eq!(perf_count(Game::<6, 0>::default(), 3), 132_720);
-        assert_eq!(perf_count(Game::<6, 0>::default(), 4), 13_586_048);
-        // assert_eq!(perf_count(&Game::<6>::default(), 5), 1_253_506_520);
+        type G = Game<6, 0>;
+        assert_eq!(perf_count(&G::default(), 0), 1);
+        assert_eq!(perf_count(&G::default(), 1), 36);
+        assert_eq!(perf_count(&G::default(), 2), 1_260);
+        assert_eq!(perf_count(&G::default(), 3), 132_720);
+        assert_eq!(perf_count(&G::default(), 4), 13_586_048);
+        // assert_eq!(perf_count(&G::default(), 5), 1_253_506_520);
     }
 }

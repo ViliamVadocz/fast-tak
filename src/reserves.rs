@@ -59,6 +59,7 @@ impl Default for Reserves<8> {
 }
 
 impl<const N: usize> Reserves<N> {
+    #[must_use]
     pub const fn depleted(self) -> bool {
         self.caps == 0 && self.stones == 0
     }

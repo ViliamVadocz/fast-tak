@@ -122,7 +122,7 @@ impl<const N: usize, const HALF_KOMI: i8> Game<N, HALF_KOMI> {
         direction: Direction,
         pattern: Pattern,
     ) -> Result<(), PlayError> {
-        let n = N as u8;
+        let n = u8::try_from(N).unwrap();
 
         let stack = self.board.get_mut(square).ok_or(PlayError::OutOfBounds)?;
         let (_, top_color) = stack.top().ok_or(PlayError::EmptySquare)?;

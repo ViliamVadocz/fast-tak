@@ -22,17 +22,17 @@ impl Colors {
     }
 
     #[inline]
-    pub const fn is_empty(&self) -> bool {
+    pub const fn is_empty(self) -> bool {
         self.bits == 1
     }
 
     #[inline]
-    pub const fn len(&self) -> u32 {
+    pub const fn len(self) -> u32 {
         BitVec::BITS - (self.bits.leading_zeros() + 1)
     }
 
     #[inline]
-    pub const fn top(&self) -> Option<Color> {
+    pub const fn top(self) -> Option<Color> {
         if self.is_empty() {
             return None;
         }
@@ -67,10 +67,10 @@ impl Colors {
     }
 
     #[inline]
-    pub fn reverse(self) -> Self {
+    pub const fn reverse(self) -> Self {
         let len = self.len();
         let bits = (1 << len) | (self.bits.reverse_bits() >> (BitVec::BITS - len));
-        Colors { bits }
+        Self { bits }
     }
 }
 

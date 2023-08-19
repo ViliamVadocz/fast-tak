@@ -10,7 +10,7 @@ pub trait Symmetry<const N: usize>: Sized {
 
 impl<const N: usize> Symmetry<N> for Square {
     fn symmetries(&self) -> [Self; 8] {
-        let n = N as u8;
+        let n = u8::try_from(N).unwrap();
         [
             *self,
             self.rotate(n),
@@ -58,11 +58,12 @@ impl<const N: usize> Symmetry<N> for Move {
 
 impl<const N: usize> Symmetry<N> for Board<N> {
     fn symmetries(&self) -> [Self; 8] {
+        let n = u8::try_from(N).unwrap();
         array::from_fn(|i| {
             let mut board = Self::default();
-            for x in 0..N {
-                for y in 0..N {
-                    let square = Square::new(y as u8, x as u8);
+            for x in 0..n {
+                for y in 0..n {
+                    let square = Square::new(y, x);
                     let target = Symmetry::<N>::symmetries(&square)[i];
                     *board.get_mut(target).unwrap() = *self.get(square).unwrap();
                 }
@@ -90,6 +91,7 @@ fn zip<const N: usize, A: Copy, B: Copy>(a: [A; N], b: [B; N]) -> [(A, B); N] {
 
 impl<const N: usize, const HALF_KOMI: i8> Game<N, HALF_KOMI> {
     #[must_use]
+    #[allow(clippy::missing_panics_doc)]
     pub fn canonical(mut self) -> Self {
         self.board = self.board.symmetries().into_iter().min().unwrap();
         self

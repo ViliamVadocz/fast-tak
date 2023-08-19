@@ -13,15 +13,15 @@ const ENDGAME_TPS: &str = "1,1,1S,121,2,1/2,12,2,1,2,1/2,x,2,221C,12C,1/x,212,22
 fn perft(c: &mut Criterion) {
     c.bench_function("perft 5x5 depth 4", |b| {
         let game = Game::<5, 0>::default();
-        b.iter(|| perf_count(game.clone(), black_box(4)))
+        b.iter(|| perf_count(&game, black_box(4)))
     });
     c.bench_function("perft 6x6 depth 4", |b| {
         let game = Game::<6, 0>::default();
-        b.iter(|| perf_count(game.clone(), black_box(4)))
+        b.iter(|| perf_count(&game, black_box(4)))
     });
     c.bench_function("perft 7x7 depth 4", |b| {
         let game = Game::<7, 0>::default();
-        b.iter(|| perf_count(game.clone(), black_box(4)))
+        b.iter(|| perf_count(&game, black_box(4)))
     });
 }
 

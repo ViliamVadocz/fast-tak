@@ -1,3 +1,6 @@
+#![warn(clippy::pedantic, clippy::nursery, clippy::style)]
+#![allow(clippy::module_name_repetitions)]
+
 mod board;
 mod colors;
 mod error;
