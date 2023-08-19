@@ -58,33 +58,28 @@ impl<const N: usize> Symmetry<N> for Move {
 
 impl<const N: usize> Symmetry<N> for Board<N> {
     fn symmetries(&self) -> [Self; 8] {
-        let mut boards = array::from_fn(|_| self.clone());
-        for (x, row) in self.iter().enumerate() {
-            for (y, &stack) in row.enumerate() {
-                let square = Square::new(x as u8, y as u8);
-                for (i, sym) in Symmetry::<N>::symmetries(&square)
-                    .into_iter()
-                    .enumerate()
-                    .skip(1)
-                {
-                    // Unwrap is sound because the square is guaranteed to be on the board.
-                    unsafe {
-                        *boards[i].get_mut(sym).unwrap_unchecked() = stack;
-                    }
+        array::from_fn(|i| {
+            let mut board = Self::default();
+            for x in 0..N {
+                for y in 0..N {
+                    let square = Square::new(y as u8, x as u8);
+                    let target = Symmetry::<N>::symmetries(&square)[i];
+                    *board.get_mut(target).unwrap() = *self.get(square).unwrap();
                 }
             }
-        }
-        boards
+            board
+        })
     }
 }
 
 impl<const N: usize, const HALF_KOMI: i8> Symmetry<N> for Game<N, HALF_KOMI> {
     fn symmetries(&self) -> [Self; 8] {
-        let mut games = array::from_fn(|_| self.clone());
-        for (i, board) in self.board.symmetries().into_iter().enumerate().skip(1) {
-            games[i].board = board;
-        }
-        games
+        let mut iter = self.board.symmetries().into_iter();
+        array::from_fn(|_| {
+            let mut game = self.clone();
+            game.board = iter.next().unwrap();
+            game
+        })
     }
 }
 
@@ -96,11 +91,7 @@ fn zip<const N: usize, A: Copy, B: Copy>(a: [A; N], b: [B; N]) -> [(A, B); N] {
 impl<const N: usize, const HALF_KOMI: i8> Game<N, HALF_KOMI> {
     #[must_use]
     pub fn canonical(mut self) -> Self {
-        for board in self.board.symmetries() {
-            if board < self.board {
-                self.board = board;
-            }
-        }
+        self.board = self.board.symmetries().into_iter().min().unwrap();
         self
     }
 }
@@ -113,29 +104,25 @@ mod tests {
     where
         Reserves<N>: Default,
     {
-        let [mut g0, mut g1, mut g2, mut g3, mut g4, mut g5, mut g6, mut g7] =
-            Game::<N, 0>::default().symmetries();
+        let mut game: Game<N, 0> = Game::default();
         let mut moves = Vec::new();
-        while matches!(g0.result(), GameResult::Ongoing) {
+        while matches!(game.result(), GameResult::Ongoing) {
             moves.clear();
-            g0.possible_moves(&mut moves);
+            game.possible_moves(&mut moves);
             let my_move = moves[seed % moves.len()];
-            let [t0, t1, t2, t3, t4, t5, t6, t7] = Symmetry::<N>::symmetries(&my_move);
-            g0.play(t0)?;
-            g1.play(t1)?;
-            g2.play(t2)?;
-            g3.play(t3)?;
-            g4.play(t4)?;
-            g5.play(t5)?;
-            g6.play(t6)?;
-            g7.play(t7)?;
+
+            let mut game_syms = game.symmetries();
+            let move_syms = Symmetry::<N>::symmetries(&my_move);
+
+            game.play(my_move)?;
+            game_syms
+                .iter_mut()
+                .zip(move_syms)
+                .try_for_each(|(game, m)| game.play(m))?;
+
+            let result = game.result();
+            assert!(game_syms.iter().all(|game| game.result() == result));
         }
-        assert_eq!(g0.result(), g1.result());
-        assert_eq!(g1.result(), g2.result());
-        assert_eq!(g2.result(), g3.result());
-        assert_eq!(g4.result(), g5.result());
-        assert_eq!(g5.result(), g6.result());
-        assert_eq!(g6.result(), g7.result());
         Ok(())
     }
 
