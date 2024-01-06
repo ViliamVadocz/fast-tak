@@ -1,6 +1,6 @@
 [package]
 name = "fast-tak"
-version = "0.4.0"
+version = "0.4.1"
 edition = "2021"
 license = "MIT"
 rust-version = "1.65"
@@ -22,3 +22,9 @@ criterion = "0.4"
 [[bench]]
 name = "bench"
 harness = false
+
+[lints.clippy]
+pedantic = "warn"
+nursery = "warn"
+style = "warn"
+module_name_repetitions = "allow"
