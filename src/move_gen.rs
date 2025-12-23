@@ -156,7 +156,7 @@ pub fn perf_count<const N: usize, const HALF_KOMI: i8>(
                 let mut clone = game.clone();
                 if clone.play(m).is_err() {
                     return 0;
-                };
+                }
                 perf_count(&clone, depth - 1)
             })
             .sum()

@@ -15,6 +15,7 @@ impl Default for Colors {
 
 impl Colors {
     #[inline]
+    #[must_use] 
     pub const fn of_one(color: Color) -> Self {
         Self {
             bits: 0b10 + from_color(color),
@@ -22,16 +23,19 @@ impl Colors {
     }
 
     #[inline]
+    #[must_use] 
     pub const fn is_empty(self) -> bool {
         self.bits == 1
     }
 
     #[inline]
+    #[must_use] 
     pub const fn len(self) -> u32 {
         BitVec::BITS - (self.bits.leading_zeros() + 1)
     }
 
     #[inline]
+    #[must_use] 
     pub const fn top(self) -> Option<Color> {
         if self.is_empty() {
             return None;
@@ -67,6 +71,7 @@ impl Colors {
     }
 
     #[inline]
+    #[must_use] 
     pub const fn reverse(self) -> Self {
         let len = self.len();
         let bits = (1 << len) | (self.bits.reverse_bits() >> (BitVec::BITS - len));

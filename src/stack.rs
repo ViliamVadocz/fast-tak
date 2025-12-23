@@ -13,6 +13,7 @@ pub struct Stack {
 
 impl Stack {
     /// Create a new stack with a single piece.
+    #[must_use]
     pub const fn new(piece: Piece, color: Color) -> Self {
         Self {
             piece,
@@ -21,6 +22,11 @@ impl Stack {
     }
 
     /// Create a new stack with the given colors.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the colors are empty.
+    #[must_use]
     pub fn exact(piece: Piece, colors: Colors) -> Self {
         assert!(!colors.is_empty());
         Self { piece, colors }
@@ -28,30 +34,40 @@ impl Stack {
 
     /// Check if anything is in this stack. If false, it means the square is
     /// empty.
+    #[must_use]
     pub const fn is_empty(&self) -> bool {
         self.colors.is_empty()
     }
 
     /// Get the size of the stack.
+    #[must_use]
     pub const fn size(&self) -> u32 {
         self.colors.len()
     }
 
     /// Get the top piece and color of this stack.
+    #[must_use]
     pub fn top(&self) -> Option<(Piece, Color)> {
         self.colors.top().map(|color| (self.piece, color))
     }
 
+    #[must_use]
     pub const fn colors(&self) -> Colors {
         self.colors
     }
 
     /// Check if this stack contributes to roads for the given color.
+    #[must_use]
     pub fn road(&self, color: Color) -> bool {
         matches!(self.top(), Some((Piece::Flat | Piece::Cap, c)) if c == color)
     }
 
     /// Try to put a piece on top of this stack.
+    ///
+    /// # Errors
+    ///
+    /// You cannot stack on top of capstones or walls with the exception
+    /// that capstones can flatten walls.
     pub fn stack(&mut self, piece: Piece, color: Color) -> Result<(), StackError> {
         // Only allow stacking on top of flats, or flattening walls.
         match self.piece {
@@ -72,6 +88,15 @@ impl Stack {
     }
 
     /// Try taking the top `amount` pieces from this tile.
+    ///
+    /// # Errors
+    ///
+    /// Trying to take 0, more than the carry limit, or more than the stack size
+    /// will result in an error.
+    ///
+    /// # Panics
+    ///
+    /// Should not panic because we check the amount beforehand.
     pub fn take<const N: usize>(&mut self, amount: u32) -> Result<(Piece, Colors), TakeError> {
         if amount == 0 {
             return Err(TakeError::Zero);
@@ -83,6 +108,11 @@ impl Stack {
 
         let piece = self.piece;
         self.piece = Piece::Flat;
-        Ok((piece, self.colors.take(amount).unwrap()))
+        Ok((
+            piece,
+            self.colors
+                .take(amount)
+                .expect("The amount should be small enough since we checked that above."),
+        ))
     }
 }
