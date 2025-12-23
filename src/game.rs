@@ -163,6 +163,83 @@ impl<const N: usize, const HALF_KOMI: i8> Game<N, HALF_KOMI> {
             self.reversible_plies += 1;
         }
     }
+
+    /// Create a Game from the board state, to move, and optionally the move
+    /// number (ply). Automatically calculates reserves based on the pieces
+    /// on the board, assuming default reserve counts at start.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the board size doesn't fit in a u8, which will never happen.
+    #[must_use]
+    pub fn from_board_and_to_move(board: Board<N>, to_move: Color, ply: Option<u16>) -> Self
+    where
+        Reserves<N>: Default,
+    {
+        // Figure out how many reserves each player has left.
+        let Reserves {
+            stones: mut white_stones,
+            caps: mut white_caps,
+        } = Reserves::<N>::default();
+        let Reserves {
+            stones: mut black_stones,
+            caps: mut black_caps,
+        } = Reserves::<N>::default();
+
+        let mut calculated_ply = 0;
+        let n = u8::try_from(N).unwrap();
+        for row in 0..n {
+            for col in 0..n {
+                let square = Square::new(row, col);
+                let stack = board.get(square).unwrap();
+
+                let Some((piece, color)) = stack.top() else {
+                    continue;
+                };
+
+                if piece == Piece::Cap {
+                    match color {
+                        Color::White => {
+                            white_stones += 1;
+                            white_caps -= 1;
+                        }
+                        Color::Black => {
+                            black_stones += 1;
+                            black_caps -= 1;
+                        }
+                    }
+                }
+
+                for color in stack.colors() {
+                    match color {
+                        Color::White => white_stones -= 1,
+                        Color::Black => black_stones -= 1,
+                    }
+                    calculated_ply += 2;
+                }
+                calculated_ply -= 1;
+            }
+        }
+
+        if calculated_ply % 2 == 0 && to_move != Color::White {
+            calculated_ply += 1; // make sure ply matches to_move
+        }
+
+        Self {
+            board,
+            to_move,
+            white_reserves: Reserves {
+                stones: white_stones,
+                caps: white_caps,
+            },
+            black_reserves: Reserves {
+                stones: black_stones,
+                caps: black_caps,
+            },
+            ply: ply.unwrap_or(calculated_ply),
+            ..Default::default()
+        }
+    }
 }
 
 #[cfg(test)]

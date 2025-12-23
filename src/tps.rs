@@ -1,6 +1,6 @@
 use std::num::NonZeroUsize;
 
-use takparse::{Color, ExtendedSquare, Piece, Stack as TpsStack, Tps};
+use takparse::{ExtendedSquare, Stack as TpsStack, Tps};
 
 use crate::{reserves::Reserves, Game};
 
@@ -37,53 +37,7 @@ where
 {
     fn from(tps: Tps) -> Self {
         let board = tps.board().collect();
-
-        // Figure out how many reserves each player has left.
-        let Reserves {
-            stones: mut white_stones,
-            caps: mut white_caps,
-        } = Reserves::<N>::default();
-        let Reserves {
-            stones: mut black_stones,
-            caps: mut black_caps,
-        } = Reserves::<N>::default();
-
-        for stack in tps.board().flatten() {
-            if stack.top() == Piece::Cap {
-                match stack.colors().last() {
-                    Some(Color::White) => {
-                        white_stones += 1;
-                        white_caps -= 1;
-                    }
-                    Some(Color::Black) => {
-                        black_stones += 1;
-                        black_caps -= 1;
-                    }
-                    None => {}
-                }
-            }
-            for color in stack.colors() {
-                match color {
-                    Color::White => white_stones -= 1,
-                    Color::Black => black_stones -= 1,
-                }
-            }
-        }
-
-        Self {
-            board,
-            to_move: tps.color(),
-            ply: tps.ply().try_into().unwrap_or_default(),
-            white_reserves: Reserves {
-                stones: white_stones,
-                caps: white_caps,
-            },
-            black_reserves: Reserves {
-                stones: black_stones,
-                caps: black_caps,
-            },
-            ..Default::default()
-        }
+        Self::from_board_and_to_move(board, tps.color(), tps.ply().try_into().ok())
     }
 }
 
